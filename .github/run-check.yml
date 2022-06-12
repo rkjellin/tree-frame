@@ -1,0 +1,20 @@
+name: run-check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: messense/maturin-action@v1
+      with:
+        manylinux: auto
+        command: develop
+        args: -m tree-frame/Cargo.toml
+    - name: check
+      run:
+        cd tree-frame
+        make check
