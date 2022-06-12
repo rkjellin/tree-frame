@@ -17,5 +17,6 @@ jobs:
         source venv/bin/activate
         pip install -r tree-frame/build.requirements.txt
     - run: |
+        source venv/bin/activate
         cd tree-frame
         make check 
