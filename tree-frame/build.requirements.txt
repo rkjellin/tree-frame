@@ -1,0 +1,11 @@
+# Dependencies
+numpy
+pyarrow
+pandas
+
+# Tooling
+maturin
+pytest
+black
+isort
+mypy
