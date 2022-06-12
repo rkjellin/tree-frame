@@ -7,7 +7,7 @@ from typing import NewType, Optional, Union
 import pandas as pd
 
 NodeId = NewType("NodeId", str)
-ParentNodeId = NewType("ParentNodId", NodeId)
+ParentNodeId = NewType("ParentNodeId", NodeId)
 
 
 @dataclass
