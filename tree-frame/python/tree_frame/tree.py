@@ -7,7 +7,7 @@ from typing import NewType, Optional, Union
 import pandas as pd
 
 NodeId = NewType("NodeId", str)
-ParentNodeId = NewType("ParentNodId", NodeId)
+ParentNodeId = NewType("ParentNodeId", NodeId)
 
 
 @dataclass
@@ -25,7 +25,7 @@ Axis = Union[TreeAxis, GroupbyAxis]
 
 
 def _gen_node_id() -> NodeId:
-    return uuid.uuid4().hex
+    return NodeId(uuid.uuid4().hex)
 
 
 @dataclass
@@ -35,7 +35,7 @@ class _TreeBuilder:
     parent_links: dict[NodeId, ParentNodeId] = field(default_factory=dict)
     rows: list[dict] = field(default_factory=list)
 
-    def _parse_row(self, record: dict, parent_node_id: Optional[ParentNodeId]):
+    def _parse_row(self, record: dict, parent_node_id: Optional[ParentNodeId]) -> None:
         nid = _gen_node_id()
         if not parent_node_id:
             self.roots.append(nid)
@@ -51,7 +51,7 @@ class _TreeBuilder:
         self,
         records: list[dict],
         parent_node_id: Optional[ParentNodeId],
-    ):
+    ) -> None:
         for row in records:
             self._parse_row(row, parent_node_id)
 
