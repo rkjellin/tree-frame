@@ -5,6 +5,8 @@ from dataclasses import dataclass, field
 from typing import NewType, Optional, Union
 
 import pandas as pd
+from tree_frame.column import ColumnName
+from tree_frame.engine.axis import AxisDefinition, HierarchicalAxisDefinition
 from tree_frame.engine.base import BaseEngine
 
 NodeId = NewType("NodeId", str)
@@ -18,15 +20,21 @@ class TreeAxis:
 
 
 @dataclass
-class GroupbyAxis:
-    groupers: list[str]
+class LabelAxis:
+    label_column: ColumnName
 
 
-Axis = Union[TreeAxis, GroupbyAxis]
+Axis = Union[TreeAxis, LabelAxis]
 
 
 def _gen_node_id() -> NodeId:
     return NodeId(uuid.uuid4().hex)
+
+
+def _find_hierarchical_axes(
+    axes: list[AxisDefinition],
+) -> list[HierarchicalAxisDefinition]:
+    return [axis for axis in axes if isinstance(axis, HierarchicalAxisDefinition)]
 
 
 @dataclass
@@ -63,7 +71,15 @@ class _TreeBuilder:
         return pd.DataFrame.from_records(self.rows)
 
     @staticmethod
-    def parse_records(records: list[dict], childprop: str) -> PyEngine:
+    def parse_records(
+        records: list[dict],
+        axes: list[AxisDefinition],
+    ) -> PyEngine:
+        hierarchical_axes = _find_hierarchical_axes(axes)
+        if len(hierarchical_axes) != 1:
+            # TODO: handle arbitrary axes
+            raise ValueError(f"Currently only one hierarchy is supported")
+        childprop = hierarchical_axes[0].childprop
         builder = _TreeBuilder(childprop=childprop)
         builder._parse_level(records, parent_node_id=None)
         return PyEngine(axes=[builder._build_axis()], storage=builder._build_storage())
@@ -74,6 +90,12 @@ class PyEngine(BaseEngine):
     axes: list[Axis]
     storage: pd.DataFrame
 
+    def clone(self) -> BaseEngine:
+        raise NotImplementedError()
+
     @staticmethod
-    def from_records(records: list[dict], childprop: str) -> PyEngine:
-        return _TreeBuilder.parse_records(records, childprop)
+    def from_records(
+        records: list[dict],
+        axes: list[AxisDefinition],
+    ) -> PyEngine:
+        return _TreeBuilder.parse_records(records, axes)
