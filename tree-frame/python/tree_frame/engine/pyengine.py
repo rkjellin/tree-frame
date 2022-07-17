@@ -5,6 +5,8 @@ from dataclasses import dataclass, field
 from typing import NewType, Optional, Union
 
 import pandas as pd
+from tree_frame.column import ColumnName
+from tree_frame.engine.axis import AxisDefinition, HierarchicalAxisDefinition
 from tree_frame.engine.base import BaseEngine
 
 NodeId = NewType("NodeId", str)
@@ -18,20 +20,32 @@ class TreeAxis:
 
 
 @dataclass
-class GroupbyAxis:
-    groupers: list[str]
+class LabelAxis:
+    label_column: ColumnName
+    labels: dict[str, int]
 
 
-Axis = Union[TreeAxis, GroupbyAxis]
+Axis = Union[TreeAxis, LabelAxis]
 
 
 def _gen_node_id() -> NodeId:
     return NodeId(uuid.uuid4().hex)
 
 
+def _find_hierarchical_axes(
+    axes: list[AxisDefinition],
+) -> list[HierarchicalAxisDefinition]:
+    return [axis for axis in axes if isinstance(axis, HierarchicalAxisDefinition)]
+
+
+def _find_label_axes(axes: list[AxisDefinition]) -> list[ColumnName]:
+    return [axis for axis in axes if isinstance(axis, ColumnName)]
+
+
 @dataclass
 class _TreeBuilder:
     childprop: str
+    label_axes: list[ColumnName]
     roots: list[NodeId] = field(default_factory=list)
     parent_links: dict[NodeId, ParentNodeId] = field(default_factory=dict)
     rows: list[dict] = field(default_factory=list)
@@ -56,17 +70,25 @@ class _TreeBuilder:
         for row in records:
             self._parse_row(row, parent_node_id)
 
-    def _build_axis(self) -> TreeAxis:
-        return TreeAxis(roots=self.roots, parent_links=self.parent_links)
+    def _build_axes(self) -> list[Axis]:
+        return [TreeAxis(roots=self.roots, parent_links=self.parent_links)]
 
     def _build_storage(self) -> pd.DataFrame:
         return pd.DataFrame.from_records(self.rows)
 
     @staticmethod
-    def parse_records(records: list[dict], childprop: str) -> PyEngine:
-        builder = _TreeBuilder(childprop=childprop)
+    def parse_records(
+        records: list[dict],
+        axes: list[AxisDefinition],
+    ) -> PyEngine:
+        hierarchical_axes = _find_hierarchical_axes(axes)
+        if len(hierarchical_axes) != 1:
+            # TODO: handle arbitrary axes
+            raise ValueError(f"Currently only one hierarchy is supported")
+        childprop = hierarchical_axes[0].childprop
+        builder = _TreeBuilder(childprop=childprop, label_axes=_find_label_axes(axes))
         builder._parse_level(records, parent_node_id=None)
-        return PyEngine(axes=[builder._build_axis()], storage=builder._build_storage())
+        return PyEngine(axes=builder._build_axes(), storage=builder._build_storage())
 
 
 @dataclass
@@ -74,6 +96,12 @@ class PyEngine(BaseEngine):
     axes: list[Axis]
     storage: pd.DataFrame
 
+    def clone(self) -> BaseEngine:
+        raise NotImplementedError()
+
     @staticmethod
-    def from_records(records: list[dict], childprop: str) -> PyEngine:
-        return _TreeBuilder.parse_records(records, childprop)
+    def from_records(
+        records: list[dict],
+        axes: list[AxisDefinition],
+    ) -> PyEngine:
+        return _TreeBuilder.parse_records(records, axes)
