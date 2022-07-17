@@ -10,6 +10,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = { version = "0.16.3", features = ["extension-module"] }
+tree-frame-core = { path = "../tree-frame-core" }
 
 [package.metadata.maturin]
 python-source = "python"
