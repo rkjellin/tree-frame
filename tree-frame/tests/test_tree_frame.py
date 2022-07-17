@@ -16,6 +16,6 @@ def test_label_axis() -> None:
             {"x": "a", "y": 4, "children": [{"x": "a", "y": 6}]},
             {"x": "b", "y": 9},
         ],
-        axes=make_axes(hierarchy1="children"),
+        axes=make_axes(hierarchy1="children", axis2="x"),
         engine="py",
     )
