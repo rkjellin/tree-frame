@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from typing import DefaultDict, NewType
 
 import polars as pl
-
 from tree_frame.column import Column
 
 NodeId = NewType("NodeId", str)
@@ -25,7 +24,7 @@ def resolve_tree_axis(
     roots: list[NodeId] = []
     uplinks: dict[NodeId, ParentNodeId] = {}
     downlinks: DefaultDict[ParentNodeId, list[NodeId]] = defaultdict(list)
-    cols = df.select(pl.col([node_id_column, parent_node_id_column]))
+    cols = df.select([pl.col(node_id_column), pl.col(parent_node_id_column)])
     for nid, pnid in cols.rows():
         if pnid is None:
             roots.append(nid)

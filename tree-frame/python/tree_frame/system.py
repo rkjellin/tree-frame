@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 
 import polars as pl
-
 from tree_frame.axis import Axis, resolve_tree_axis
 from tree_frame.column import Column
 

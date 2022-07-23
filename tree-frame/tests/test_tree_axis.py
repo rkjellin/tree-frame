@@ -1,5 +1,6 @@
 import polars as pl
 from tree_frame.axis import resolve_tree_axis
+from tree_frame.column import Column
 
 
 def test_resolve_tree_axis() -> None:
@@ -11,5 +12,5 @@ def test_resolve_tree_axis() -> None:
         }
     )
     tree_axis = resolve_tree_axis(
-        node_id_column="nid", parent_node_id_column="pnid", df=df
+        node_id_column=Column("nid"), parent_node_id_column=Column("pnid"), df=df
     )
