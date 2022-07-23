@@ -4,7 +4,7 @@ import uuid
 from dataclasses import dataclass, field
 from typing import NewType, Optional, Union
 
-import pandas as pd
+import polars as pl
 from tree_frame.column import ColumnName
 from tree_frame.engine.axis import AxisDefinition, HierarchicalAxisDefinition
 from tree_frame.engine.base import BaseEngine
@@ -73,8 +73,8 @@ class _TreeBuilder:
     def _build_axes(self) -> list[Axis]:
         return [TreeAxis(roots=self.roots, parent_links=self.parent_links)]
 
-    def _build_storage(self) -> pd.DataFrame:
-        return pd.DataFrame.from_records(self.rows)
+    def _build_storage(self) -> pl.DataFrame:
+        return pl.from_dicts(self.rows)
 
     @staticmethod
     def parse_records(
@@ -94,7 +94,7 @@ class _TreeBuilder:
 @dataclass
 class PyEngine(BaseEngine):
     axes: list[Axis]
-    storage: pd.DataFrame
+    storage: pl.DataFrame
 
     def clone(self) -> BaseEngine:
         raise NotImplementedError()

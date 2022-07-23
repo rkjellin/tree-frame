@@ -12,7 +12,7 @@ classifiers = [
 ]
 
 dependencies = [
-  "pandas"
+  "polars[pyarrow]"
 ]
 
 [tool.mypy]
@@ -22,5 +22,5 @@ show_error_codes = true
 files = ["python", "tests"]
 
 [[tool.mypy.overrides]]
-module = ["pyarrow.*", "pandas.*", "tree_frame.tree_frame"]
+module = ["pyarrow.*", "polars.*", "tree_frame.tree_frame"]
 ignore_missing_imports = true
