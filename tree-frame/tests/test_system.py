@@ -1,8 +1,8 @@
 import polars as pl
-from tree_frame.axis import resolve_tree_axis
+from tree_frame.system import AxisSystem
 
 
-def test_resolve_tree_axis() -> None:
+def test_add_tree_axis() -> None:
     df = pl.DataFrame(
         {
             "nid": [1, 2, 3, 4, 5, 6],
@@ -10,6 +10,5 @@ def test_resolve_tree_axis() -> None:
             "x": ["a", "b", "c", "d", "e", "f"],
         }
     )
-    tree_axis = resolve_tree_axis(
-        node_id_column="nid", parent_node_id_column="pnid", df=df
-    )
+    system = AxisSystem()
+    system.add_tree_axis(node_id_column="nid", parent_node_id_column="pnid", df=df)
