@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import DefaultDict, NewType
 
 import polars as pl
+
 from tree_frame.column import Column
 
 NodeId = NewType("NodeId", str)
