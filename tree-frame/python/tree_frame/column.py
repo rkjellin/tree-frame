@@ -1,2 +1,3 @@
-class ColumnName(str):
-    ...
+from typing import NewType
+
+Column = NewType("Column", str)
